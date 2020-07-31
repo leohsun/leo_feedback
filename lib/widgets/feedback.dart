@@ -13,13 +13,27 @@ class LeoFeedBack extends StatefulWidget {
 }
 
 class _LeoFeedBackState extends State<LeoFeedBack> {
+  FeedbackBrightness _brightness;
+
+  @override
+  void initState() {
+    _brightness = widget.brightness;
+    super.initState();
+  }
+
+  @override
+  void didUpdateWidget(LeoFeedBack oldWidget) {
+    if (widget.brightness != _brightness) _brightness = widget.brightness;
+    super.didUpdateWidget(oldWidget);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Directionality(
       child: Overlay(
         initialEntries: [
           OverlayEntry(builder: (BuildContext ctx) {
-            FeedBackHost._init(context: ctx,brightness: widget.brightness);
+            FeedBackHost._init(context: ctx, brightness: _brightness);
             return widget.child;
           })
         ],

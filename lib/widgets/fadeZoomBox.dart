@@ -21,9 +21,9 @@ class _FadeZoomBoxState extends State<FadeZoomBox>
   void initState() {
     super.initState();
     controller =
-        AnimationController(vsync: this, duration: Duration(milliseconds: 200));
+        AnimationController(vsync: this, duration: Duration(milliseconds: 100));
     animation = Tween<double>(begin: 0, end: 1)
-        .animate(CurvedAnimation(parent: controller, curve: Curves.easeInOut))
+        .animate(CurvedAnimation(parent: controller, curve: Curves.easeIn))
           ..addListener(() {
             setState(() {});
           });
@@ -32,8 +32,8 @@ class _FadeZoomBoxState extends State<FadeZoomBox>
 
   @override
   void dispose() {
-    super.dispose();
     controller.dispose();
+    super.dispose();
   }
 
   @override
