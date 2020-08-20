@@ -28,6 +28,18 @@ class _FadeZoomBoxState extends State<FadeZoomBox>
             setState(() {});
           });
     controller.forward();
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      if (FeedBackHost.instance
+              ._shouldCallAfterFadeZoomBoxWidgetCreatedFunctions.length >
+          0) {
+        FeedBackHost.instance._shouldCallAfterFadeZoomBoxWidgetCreatedFunctions
+            .forEach((cb) {
+          cb();
+        });
+        FeedBackHost.instance._shouldCallAfterFadeZoomBoxWidgetCreatedFunctions
+            .clear();
+      }
+    });
   }
 
   @override

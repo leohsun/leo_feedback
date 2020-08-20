@@ -4,3 +4,4 @@ enum FeedbackBrightness { dark, light }
 enum AlertType { normal, confirm }
 enum SliderDirection { top, bottom, right, left }
 enum MessageType { success, warning, info, error }
+typedef FutureCallBack = Future<void> Function();
