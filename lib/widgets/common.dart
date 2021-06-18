@@ -1,6 +1,6 @@
 part of 'package:leo_feedback/leo_feedback.dart';
 
-Widget buildBlurWidget({Widget child, BorderRadius borderRadius}) {
+Widget buildBlurWidget({required Widget child, BorderRadius? borderRadius}) {
   return ClipRRect(
     borderRadius: borderRadius ?? BorderRadius.circular(12),
     child: BackdropFilter(
@@ -14,10 +14,10 @@ Widget buildBlurWidget({Widget child, BorderRadius borderRadius}) {
 }
 
 Widget buildButtonWidget(
-    {@required Widget child,
-    VoidCallback onPress,
-    BorderRadius borderRadius,
-    Color color}) {
+    {required Widget child,
+    VoidCallback? onPress,
+    BorderRadius? borderRadius,
+    Color? color}) {
   Color _color = color ?? Colors.transparent;
   return Material(
     color: _color,

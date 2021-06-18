@@ -3,9 +3,13 @@ part of 'package:leo_feedback/leo_feedback.dart';
 class LeoFeedBack extends StatefulWidget {
   final Widget child;
   final FeedbackBrightness brightness;
+  final double designWidth;
 
   const LeoFeedBack(
-      {Key key, this.brightness = FeedbackBrightness.light, this.child})
+      {Key? key,
+      this.brightness = FeedbackBrightness.light,
+      required this.child,
+      required this.designWidth})
       : super(key: key);
 
   @override
@@ -13,7 +17,7 @@ class LeoFeedBack extends StatefulWidget {
 }
 
 class _LeoFeedBackState extends State<LeoFeedBack> {
-  FeedbackBrightness _brightness;
+  FeedbackBrightness _brightness = FeedbackBrightness.light;
 
   @override
   void initState() {
@@ -33,7 +37,10 @@ class _LeoFeedBackState extends State<LeoFeedBack> {
       child: Overlay(
         initialEntries: [
           OverlayEntry(builder: (BuildContext ctx) {
-            FeedBackHost._init(context: ctx, brightness: _brightness);
+            FeedBackHost._init(
+                context: ctx,
+                brightness: _brightness,
+                designWidth: widget.designWidth);
             return widget.child;
           })
         ],

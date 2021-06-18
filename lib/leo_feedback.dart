@@ -14,30 +14,36 @@ part 'widgets/feedback.dart';
 part 'theme.dart';
 part 'actions.dart';
 part 'model.dart';
-
-class DelayTween extends Tween<double> {
-  DelayTween({double begin, double end, this.delay}) : super(begin: begin, end: end);
-
-  final double delay;
-
-  @override
-  double lerp(double t) => super.lerp((math.sin((t - delay) * 2 * math.pi) + 1) / 2);
-}
+part 'tools.dart';
 
 class FeedBackHost {
-  BuildContext context;
+  bool intanceGenerateByInit = false;
+
+  BuildContext? context;
 
   double designWidth = 375;
 
-  double ratio;
+  double ratio = 1.0;
 
-  FeedbackBrightness brightness;
+  bool fadeZoomBoxCreated = false;
 
-  FeedbackThemeData feedBackTheme;
+  MediaQueryData mediaQueryData =
+      MediaQueryData.fromWindow(WidgetsBinding.instance!.window);
 
-  OverlayEntry _uniqueOverlayEntry;
+  FeedbackBrightness? brightness;
 
-  GlobalKey _uniqueGlobalStateKey;
+  FeedbackThemeData feedBackTheme =
+      FeedbackThemeData(brightness: FeedbackBrightness.light);
+
+  OverlayEntry? _uniqueOverlayEntry;
+
+  GlobalKey _uniqueGlobalStateKey = FeedBackHost._defaultUniqueGlobalKey;
+
+  static GlobalKey _defaultUniqueGlobalKey =
+      GlobalKey(debugLabel: '_defaultUniqueGlobalKey');
+
+  static GlobalKey _loadingGlobalKey =
+      GlobalKey(debugLabel: '_defaultUniqueGlobalKey');
 
   Set<Function> _shouldCallAfterFadeZoomBoxWidgetCreatedFunctions = Set();
   Set<Function> _shouldCallAfterSliderWidgetCreatedFunctions = Set();
@@ -46,20 +52,37 @@ class FeedBackHost {
 
   Set<GlobalKey> _sliderKeysSet = Set();
 
-  static FeedBackHost instance;
+  FeedBackHost(bool executeInit) {
+    this.intanceGenerateByInit = executeInit;
+  }
 
-  FeedBackHost._init({BuildContext context, FeedbackBrightness brightness}) {
-    print('---init');
-    instance ??= this;
-    instance.context ??= context;
+  static FeedBackHost instance = FeedBackHost(false);
+
+  static calcScaleRatio(double desiginWidth) {
+    double screenWidth = FeedBackHost.instance.mediaQueryData.size.width;
+    double ratio = screenWidth / desiginWidth;
+    instance.ratio = double.parse(ratio.toStringAsFixed(6));
+  }
+
+  FeedBackHost._init(
+      {required BuildContext context,
+      required FeedbackBrightness brightness,
+      required double designWidth}) {
+    if (!instance.intanceGenerateByInit) {
+      instance = this;
+      instance.intanceGenerateByInit = true;
+      instance.context = context;
+      FeedBackHost.calcScaleRatio(designWidth);
+    }
     if (instance.brightness != brightness) {
       instance.brightness = brightness;
       instance.feedBackTheme = FeedbackThemeData(brightness: brightness);
     }
   }
 
-  OverlayEntry _show(Widget child, {bool cover, bool unique, bool isSlider}) {
-    cover ??= true;
+  OverlayEntry _show(Widget child,
+      {bool? cover, bool? unique, bool? isSlider}) {
+    bool _cover = cover ?? true;
     unique ??= false;
     isSlider ??= false;
     assert(
@@ -68,17 +91,20 @@ class FeedBackHost {
             (isSlider == false && unique == false),
         'either "unique" or "isSlider" only one can be true of boolean');
     bool dark = FeedBackHost.instance.brightness == FeedbackBrightness.dark;
-    Color overlayColor = dark ? Color.fromRGBO(0, 0, 0, 0.3) : Color.fromRGBO(0, 0, 0, 0.15);
+    Color overlayColor =
+        dark ? Color.fromRGBO(0, 0, 0, 0.3) : Color.fromRGBO(0, 0, 0, 0.15);
     OverlayEntry _overlayEntry = OverlayEntry(
       builder: (BuildContext ctx) => WidgetsApp(
         color: Colors.grey,
         debugShowCheckedModeBanner: false,
-        builder: (BuildContext context, Widget _child) => Container(color: cover ? overlayColor : null, child: child),
+        builder: (BuildContext context, Widget? _child) =>
+            Container(color: _cover ? overlayColor : null, child: child),
       ),
     );
     if (unique) FeedBackHost.instance._uniqueOverlayEntry = _overlayEntry;
-    if (isSlider) FeedBackHost.instance._sliderOverlayEntrySet.add(_overlayEntry);
-    Overlay.of(instance.context).insert(_overlayEntry);
+    if (isSlider)
+      FeedBackHost.instance._sliderOverlayEntrySet.add(_overlayEntry);
+    Overlay.of(instance.context!)!.insert(_overlayEntry);
     print(FeedBackHost.instance._sliderOverlayEntrySet.length);
     return _overlayEntry;
   }
@@ -89,9 +115,9 @@ class FeedBackHost {
 
   void _dismissUnique() {
     if (instance._uniqueOverlayEntry != null) {
-      instance._uniqueOverlayEntry.remove();
+      instance._uniqueOverlayEntry!.remove();
       instance._uniqueOverlayEntry = null;
     }
-    instance._uniqueGlobalStateKey = null;
+    instance._uniqueGlobalStateKey = FeedBackHost._defaultUniqueGlobalKey;
   }
 }

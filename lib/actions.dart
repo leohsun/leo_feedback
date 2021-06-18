@@ -1,8 +1,9 @@
 part of 'package:leo_feedback/leo_feedback.dart';
 
-void showToast(String msg, {Duration duration}) {
+void showToast(String? msg, {Duration? duration}) {
   final FeedbackThemeData theme = FeedBackHost.instance.feedBackTheme;
-  final GlobalKey<_FadeZoomBoxState> _fadeZoomBox = GlobalKey();
+  final GlobalKey<_FadeZoomBoxState> _fadeZoomBox =
+      GlobalKey(debugLabel: 'toast key');
   Widget toastWidget = FadeZoomBox(
     key: _fadeZoomBox,
     child: Container(
@@ -10,7 +11,9 @@ void showToast(String msg, {Duration duration}) {
           minWidth: 170,
         ),
         decoration: BoxDecoration(
-            color: theme.dialogBackgroundColor, borderRadius: BorderRadius.circular(6), boxShadow: theme.boxShadow),
+            color: theme.dialogBackgroundColor,
+            borderRadius: BorderRadius.circular(6),
+            boxShadow: theme.boxShadow),
         child: buildBlurWidget(
           borderRadius: BorderRadius.circular(6),
           child: Padding(
@@ -24,22 +27,23 @@ void showToast(String msg, {Duration duration}) {
           ),
         )),
   );
-  OverlayEntry _overlayEntry = FeedBackHost.instance._show(toastWidget, cover: false);
+  OverlayEntry _overlayEntry =
+      FeedBackHost.instance._show(toastWidget, cover: false);
 
   Duration _duration = duration ?? Duration(seconds: 3);
 
   Future.delayed(_duration, () async {
-    await _fadeZoomBox.currentState.reverseAnimation();
+    await _fadeZoomBox.currentState!.reverseAnimation();
     FeedBackHost.instance._dismiss(_overlayEntry);
   });
 }
 
-void showLoading({String title}) {
-  print('show loading');
+void showLoading(
+    {String title = 'none', Duration? duration, bool cover = true}) {
+  if (FeedBackHost.instance._uniqueGlobalStateKey ==
+      FeedBackHost._loadingGlobalKey) return;
   FeedbackThemeData theme = FeedBackHost.instance.feedBackTheme;
-  bool isLoadingOpened = FeedBackHost.instance._uniqueGlobalStateKey != null;
-  if (isLoadingOpened) return;
-  FeedBackHost.instance._uniqueGlobalStateKey = GlobalKey();
+  FeedBackHost.instance._uniqueGlobalStateKey = FeedBackHost._loadingGlobalKey;
   bool showTitle = title != 'none';
 
   Widget toastWidget = FadeZoomBox(
@@ -70,7 +74,7 @@ void showLoading({String title}) {
                 ),
                 showTitle
                     ? Text(
-                        title ?? '数据加载中',
+                        title,
                         style: TextStyle(color: theme.labelPrimaryColor),
                       )
                     : SizedBox()
@@ -81,37 +85,54 @@ void showLoading({String title}) {
       ),
     ),
   );
-  FeedBackHost.instance._show(toastWidget, unique: true);
+  FeedBackHost.instance._show(toastWidget, unique: true, cover: cover);
+
+  if (duration != null) {
+    Future.delayed(duration).then((value) => hideLoading());
+  }
   print('show end');
 }
 
 void hideLoading() async {
-//  do it after loading widget was created;
-  print('hide loading');
-  bool uniqueWidgetWasCreated = FeedBackHost.instance._uniqueGlobalStateKey != null &&
-      FeedBackHost.instance._uniqueGlobalStateKey.currentState.runtimeType != Null;
-  if (!uniqueWidgetWasCreated) {
-    FeedBackHost.instance._shouldCallAfterFadeZoomBoxWidgetCreatedFunctions.add(() async {
-      bool isLoadingOpened = FeedBackHost.instance._uniqueGlobalStateKey != null &&
-          FeedBackHost.instance._uniqueGlobalStateKey.currentState.runtimeType == _FadeZoomBoxState;
+  if (FeedBackHost.instance._uniqueGlobalStateKey !=
+      FeedBackHost._loadingGlobalKey) return;
+  //  do it after loading widget was created;
+  if (!FeedBackHost.instance.fadeZoomBoxCreated) {
+    FeedBackHost.instance._shouldCallAfterFadeZoomBoxWidgetCreatedFunctions
+        .add(() async {
+      bool isLoadingOpened = FeedBackHost.instance._uniqueGlobalStateKey !=
+              FeedBackHost._defaultUniqueGlobalKey &&
+          FeedBackHost
+                  .instance._uniqueGlobalStateKey.currentState.runtimeType ==
+              _FadeZoomBoxState;
       if (!isLoadingOpened) return;
-      await (FeedBackHost.instance._uniqueGlobalStateKey.currentState as _FadeZoomBoxState).reverseAnimation();
+      await (FeedBackHost.instance._uniqueGlobalStateKey.currentState
+              as _FadeZoomBoxState)
+          .reverseAnimation();
 
       FeedBackHost.instance._dismissUnique();
     });
   } else {
-    bool isLoadingOpened = FeedBackHost.instance._uniqueGlobalStateKey != null &&
-        FeedBackHost.instance._uniqueGlobalStateKey.currentState.runtimeType == _FadeZoomBoxState;
-    if (!isLoadingOpened) return;
-    await (FeedBackHost.instance._uniqueGlobalStateKey.currentState as _FadeZoomBoxState).reverseAnimation();
+    await (FeedBackHost.instance._uniqueGlobalStateKey.currentState
+            as _FadeZoomBoxState)
+        .reverseAnimation();
 
     FeedBackHost.instance._dismissUnique();
   }
 }
 
-void showAlert({String title, String content, AlertType type, VoidCallback onCancel, VoidCallback onConfirm}) async {
+void noop() {}
+
+void showAlert(
+    {String? title,
+    required String content,
+    AlertType? type,
+    VoidCallback? onCancel,
+    VoidCallback? onConfirm}) async {
   FeedbackThemeData theme = FeedBackHost.instance.feedBackTheme;
-  FeedBackHost.instance._uniqueGlobalStateKey = GlobalKey();
+  FeedBackHost.instance._uniqueGlobalStateKey =
+      GlobalKey(debugLabel: 'alert key');
+  print(FeedBackHost.instance);
   final double _width = 270;
   final double _bottomHeight = 44;
   final String _title = (title != null && title.isNotEmpty) ? title : '提示';
@@ -119,7 +140,12 @@ void showAlert({String title, String content, AlertType type, VoidCallback onCan
   AlertType _type = type ?? AlertType.normal;
 
   void _dismissAlert() async {
-    await (FeedBackHost.instance._uniqueGlobalStateKey.currentState as _FadeZoomBoxState)?.reverseAnimation();
+    print(FeedBackHost.instance._uniqueGlobalStateKey);
+    if (FeedBackHost.instance._uniqueGlobalStateKey.currentState != null) {
+      await (FeedBackHost.instance._uniqueGlobalStateKey.currentState
+              as _FadeZoomBoxState)
+          .reverseAnimation();
+    }
     FeedBackHost.instance._dismissUnique();
   }
 
@@ -139,13 +165,15 @@ void showAlert({String title, String content, AlertType type, VoidCallback onCan
         children: <Widget>[
           Expanded(
             child: buildButtonWidget(
-                borderRadius: BorderRadius.only(bottomLeft: Radius.circular(14)),
+                borderRadius:
+                    BorderRadius.only(bottomLeft: Radius.circular(14)),
                 child: Container(
                   height: _bottomHeight,
                   child: Center(
                     child: Text(
                       '取消',
-                      style: TextStyle(fontSize: 20, color: theme.labelSecondaryColor),
+                      style: TextStyle(
+                          fontSize: 20, color: theme.labelSecondaryColor),
                     ),
                   ),
                 ),
@@ -158,13 +186,15 @@ void showAlert({String title, String content, AlertType type, VoidCallback onCan
           ),
           Expanded(
             child: buildButtonWidget(
-                borderRadius: BorderRadius.only(bottomRight: Radius.circular(14)),
+                borderRadius:
+                    BorderRadius.only(bottomRight: Radius.circular(14)),
                 child: Container(
                   height: _bottomHeight,
                   child: Center(
                     child: Text(
                       '确定',
-                      style: TextStyle(fontSize: 20, color: theme.baseBlueColor),
+                      style:
+                          TextStyle(fontSize: 20, color: theme.baseBlueColor),
                     ),
                   ),
                 ),
@@ -175,7 +205,8 @@ void showAlert({String title, String content, AlertType type, VoidCallback onCan
 
 //    default --> AlertType.normal
     return buildButtonWidget(
-        borderRadius: BorderRadius.only(bottomLeft: Radius.circular(14), bottomRight: Radius.circular(14)),
+        borderRadius: BorderRadius.only(
+            bottomLeft: Radius.circular(14), bottomRight: Radius.circular(14)),
         child: Container(
           width: _width,
           height: _bottomHeight,
@@ -198,7 +229,9 @@ void showAlert({String title, String content, AlertType type, VoidCallback onCan
         children: <Widget>[
           buildBlurWidget(
               child: Container(
-            decoration: BoxDecoration(color: theme.dialogBackgroundColor, borderRadius: BorderRadius.circular(14)),
+            decoration: BoxDecoration(
+                color: theme.dialogBackgroundColor,
+                borderRadius: BorderRadius.circular(14)),
           )),
           Positioned.fill(
               child: Column(
@@ -206,20 +239,25 @@ void showAlert({String title, String content, AlertType type, VoidCallback onCan
             crossAxisAlignment: CrossAxisAlignment.center,
             children: <Widget>[
               Padding(
-                padding: EdgeInsets.only(left: 16, right: 16, top: 19, bottom: 21),
+                padding:
+                    EdgeInsets.only(left: 16, right: 16, top: 19, bottom: 21),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: <Widget>[
                     Text(
                       _title,
-                      style: TextStyle(color: theme.labelPrimaryColor, fontSize: 16, fontWeight: FontWeight.w500),
+                      style: TextStyle(
+                          color: theme.labelPrimaryColor,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500),
                     ),
                     SizedBox(
                       height: 2,
                     ),
                     Text(
-                      content ?? '正文内容',
-                      style: TextStyle(color: theme.labelPrimaryColor, fontSize: 14),
+                      content,
+                      style: TextStyle(
+                          color: theme.labelPrimaryColor, fontSize: 14),
                       textAlign: TextAlign.center,
                     ),
                   ],
@@ -240,39 +278,41 @@ void showAlert({String title, String content, AlertType type, VoidCallback onCan
   FeedBackHost.instance._show(toastWidget, unique: true);
 }
 
-void showMessage(String message, {MessageType type, Duration duration, VoidCallback onPress}) {
+void showMessage(String message,
+    {MessageType type = MessageType.info,
+    Duration duration = const Duration(seconds: 3),
+    VoidCallback onPress = noop}) {
   FeedbackThemeData theme = FeedBackHost.instance.feedBackTheme;
   GlobalKey<_SliderState> _slider = GlobalKey<_SliderState>();
-  Duration _duration = duration ?? Duration(seconds: 3);
-  MessageType _type = type ?? MessageType.info;
   IconData _icon;
   Color _bgColor;
-  String _msg = message ?? '...';
-  switch (_type) {
+  final String _msg = message;
+  switch (type) {
     case MessageType.success:
       _icon = Icons.check_circle_outline;
-      _bgColor = theme.baseGreenColor;
+      _bgColor = theme.baseGreenColor!;
       break;
     case MessageType.error:
       _icon = Icons.highlight_off;
-      _bgColor = theme.baseRedColor;
+      _bgColor = theme.baseRedColor!;
       HapticFeedback.lightImpact();
       break;
     case MessageType.warning:
       _icon = Icons.remove_circle;
-      _bgColor = theme.baseOrangeColor;
+      _bgColor = theme.baseOrangeColor!;
       HapticFeedback.lightImpact();
       break;
     case MessageType.info:
       _icon = Icons.info_outline;
-      _bgColor = theme.baseTealColor;
+      _bgColor = theme.baseTealColor!;
       break;
   }
   Widget messageWidget = Slider(
     key: _slider,
     noMask: true,
     child: Padding(
-      padding: EdgeInsets.only(left: 8, right: 8, top: Platform.isAndroid ? 24 : 40),
+      padding:
+          EdgeInsets.only(left: 8, right: 8, top: Platform.isAndroid ? 24 : 40),
       child: Stack(
         children: <Widget>[
           buildBlurWidget(
@@ -298,7 +338,9 @@ void showMessage(String message, {MessageType type, Duration duration, VoidCallb
                         Expanded(
                           child: Text(
                             _msg,
-                            style: TextStyle(color: Colors.white, fontWeight: FontWeight.w500),
+                            style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w500),
 //                              overflow: TextOverflow.fade,
                             maxLines: 2,
 //                              softWrap: false,
@@ -315,16 +357,21 @@ void showMessage(String message, {MessageType type, Duration duration, VoidCallb
       ),
     ),
   );
-  OverlayEntry messageOverlayEntry = FeedBackHost.instance._show(messageWidget, cover: false);
+  OverlayEntry messageOverlayEntry =
+      FeedBackHost.instance._show(messageWidget, cover: false);
 
-  Future.delayed(_duration, () async {
-    await _slider.currentState.reverseAnimation();
+  Future.delayed(duration, () async {
+    await _slider.currentState!.reverseAnimation();
     FeedBackHost.instance._dismiss(messageOverlayEntry);
   });
 }
 
 void showSlider(
-    {Widget child, Duration duration, SliderDirection direction, bool closeOnClickMask, bool autoClose}) async {
+    {required Widget child,
+    Duration? duration,
+    required SliderDirection direction,
+    bool? closeOnClickMask,
+    bool? autoClose}) async {
   assert(
       (autoClose != true && closeOnClickMask == true) ||
           (autoClose == true && closeOnClickMask != true) ||
@@ -334,6 +381,8 @@ void showSlider(
 
   bool _autoClose = autoClose ?? false;
   bool _closeOnClickMask = closeOnClickMask ?? false;
+
+  Duration _duration = duration ?? Duration(milliseconds: 3000);
 
   Widget _slider = Slider(
     key: _sliderKey,
@@ -346,8 +395,8 @@ void showSlider(
 
   if (_autoClose) {
     sliderEntry = FeedBackHost.instance._show(_slider);
-    Future.delayed(Duration(milliseconds: 3000), () async {
-      await _sliderKey.currentState.reverseAnimation();
+    Future.delayed(_duration, () async {
+      await _sliderKey.currentState!.reverseAnimation();
       FeedBackHost.instance._dismiss(sliderEntry);
     });
   } else {
@@ -357,20 +406,29 @@ void showSlider(
 }
 
 void hideSlider() async {
-  bool isSliderOpened =
-      FeedBackHost.instance._sliderKeysSet.length > 0 && FeedBackHost.instance._sliderKeysSet.last.runtimeType != Null;
+  bool isSliderOpened = FeedBackHost.instance._sliderKeysSet.length > 0 &&
+      FeedBackHost.instance._sliderKeysSet.last.runtimeType != Null;
   if (!isSliderOpened) {
-    FeedBackHost.instance._shouldCallAfterSliderWidgetCreatedFunctions.add(() async {
-      await (FeedBackHost.instance._sliderKeysSet.last.currentState as _SliderState).reverseAnimation();
+    FeedBackHost.instance._shouldCallAfterSliderWidgetCreatedFunctions
+        .add(() async {
+      await (FeedBackHost.instance._sliderKeysSet.last.currentState
+              as _SliderState)
+          .reverseAnimation();
       FeedBackHost.instance._sliderOverlayEntrySet.last.remove();
-      FeedBackHost.instance._sliderOverlayEntrySet.remove(FeedBackHost.instance._sliderOverlayEntrySet.last);
-      FeedBackHost.instance._sliderKeysSet.remove(FeedBackHost.instance._sliderKeysSet.last);
+      FeedBackHost.instance._sliderOverlayEntrySet
+          .remove(FeedBackHost.instance._sliderOverlayEntrySet.last);
+      FeedBackHost.instance._sliderKeysSet
+          .remove(FeedBackHost.instance._sliderKeysSet.last);
     });
   } else {
-    await (FeedBackHost.instance._sliderKeysSet.last.currentState as _SliderState).reverseAnimation();
+    await (FeedBackHost.instance._sliderKeysSet.last.currentState
+            as _SliderState)
+        .reverseAnimation();
     FeedBackHost.instance._sliderOverlayEntrySet.last.remove();
-    FeedBackHost.instance._sliderOverlayEntrySet.remove(FeedBackHost.instance._sliderOverlayEntrySet.last);
-    FeedBackHost.instance._sliderKeysSet.remove(FeedBackHost.instance._sliderKeysSet.last);
+    FeedBackHost.instance._sliderOverlayEntrySet
+        .remove(FeedBackHost.instance._sliderOverlayEntrySet.last);
+    FeedBackHost.instance._sliderKeysSet
+        .remove(FeedBackHost.instance._sliderKeysSet.last);
   }
 }
 

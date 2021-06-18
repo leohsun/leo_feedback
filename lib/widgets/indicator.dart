@@ -1,9 +1,9 @@
 part of 'package:leo_feedback/leo_feedback.dart';
 
 class Indicator extends StatefulWidget {
-  final FeedbackBrightness brightness;
+  final FeedbackBrightness? brightness;
 
-  const Indicator({Key key, this.brightness}) : super(key: key);
+  const Indicator({Key? key, this.brightness}) : super(key: key);
 
   @override
   _IndicatorState createState() => _IndicatorState();
@@ -11,7 +11,7 @@ class Indicator extends StatefulWidget {
 
 class _IndicatorState extends State<Indicator>
     with SingleTickerProviderStateMixin {
-  AnimationController _animationController;
+  AnimationController? _animationController;
 
   final List<double> delays = [.0, -0.8, -0.7, -0.6, -0.4, -0.3, -0.2, -0.1];
 
@@ -21,12 +21,12 @@ class _IndicatorState extends State<Indicator>
     _animationController = AnimationController(
         vsync: this, duration: Duration(milliseconds: 1200));
 
-    _animationController.repeat();
+    _animationController!.repeat();
   }
 
   @override
   void dispose() {
-    _animationController.dispose();
+    _animationController!.dispose();
     super.dispose();
   }
 
@@ -48,7 +48,7 @@ class _IndicatorState extends State<Indicator>
                 alignment: Alignment.center,
                 child: FadeTransition(
                   opacity: DelayTween(begin: 0.1, end: 1.0, delay: delays[i])
-                      .animate(_animationController),
+                      .animate(_animationController!),
                   child: Container(
                     width: 6,
                     height: 14,
