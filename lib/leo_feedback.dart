@@ -25,7 +25,7 @@ class FeedBackHost {
 
   double ratio = 1.0;
 
-  bool fadeZoomBoxCreated = false;
+  bool _loadingWidgetCreated = false;
 
   MediaQueryData mediaQueryData =
       MediaQueryData.fromWindow(WidgetsBinding.instance!.window);

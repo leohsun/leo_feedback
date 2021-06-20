@@ -29,7 +29,12 @@ class _FadeZoomBoxState extends State<FadeZoomBox>
           });
     controller!.forward();
     WidgetsBinding.instance!.addPostFrameCallback((timeStamp) {
-      FeedBackHost.instance.fadeZoomBoxCreated = true;
+      if (FeedBackHost.instance._uniqueGlobalStateKey ==
+          FeedBackHost._loadingGlobalKey) {
+        FeedBackHost.instance._loadingWidgetCreated = true;
+
+        print('fadeZoombox created');
+      }
       if (FeedBackHost.instance
               ._shouldCallAfterFadeZoomBoxWidgetCreatedFunctions.length >
           0) {
@@ -46,7 +51,6 @@ class _FadeZoomBoxState extends State<FadeZoomBox>
   @override
   void dispose() {
     controller!.dispose();
-    FeedBackHost.instance.fadeZoomBoxCreated = false;
     super.dispose();
   }
 

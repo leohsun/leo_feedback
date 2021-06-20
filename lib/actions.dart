@@ -96,15 +96,14 @@ void showLoading(
 void hideLoading() async {
   if (FeedBackHost.instance._uniqueGlobalStateKey !=
       FeedBackHost._loadingGlobalKey) return;
+
   //  do it after loading widget was created;
-  if (!FeedBackHost.instance.fadeZoomBoxCreated) {
+  if (!FeedBackHost.instance._loadingWidgetCreated) {
     FeedBackHost.instance._shouldCallAfterFadeZoomBoxWidgetCreatedFunctions
         .add(() async {
-      bool isLoadingOpened = FeedBackHost.instance._uniqueGlobalStateKey !=
-              FeedBackHost._defaultUniqueGlobalKey &&
-          FeedBackHost
-                  .instance._uniqueGlobalStateKey.currentState.runtimeType ==
-              _FadeZoomBoxState;
+      bool isLoadingOpened = FeedBackHost.instance._uniqueGlobalStateKey ==
+          FeedBackHost._loadingGlobalKey;
+      print('isLoadingOpened :$isLoadingOpened');
       if (!isLoadingOpened) return;
       await (FeedBackHost.instance._uniqueGlobalStateKey.currentState
               as _FadeZoomBoxState)
