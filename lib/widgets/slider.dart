@@ -88,6 +88,7 @@ class _SliderState extends State<Slider> with SingleTickerProviderStateMixin {
     }
 
     return Stack(
+      fit: StackFit.expand,
       children: <Widget>[
         widget.noMask
             ? SizedBox()

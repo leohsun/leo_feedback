@@ -36,9 +36,9 @@ class _LeoFeedBackState extends State<LeoFeedBack> {
     return Directionality(
       child: Overlay(
         initialEntries: [
-          OverlayEntry(builder: (BuildContext ctx) {
+          OverlayEntry(builder: (BuildContext context) {
             FeedBackHost._init(
-                context: ctx,
+                context: context,
                 brightness: _brightness,
                 designWidth: widget.designWidth);
             return widget.child;

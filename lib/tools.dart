@@ -1,7 +1,6 @@
 part of 'package:leo_feedback/leo_feedback.dart';
 
 double size(double size) {
-  print(size * FeedBackHost.instance.ratio);
   return size * FeedBackHost.instance.ratio;
 }
 

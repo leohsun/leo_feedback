@@ -74,6 +74,12 @@ class FeedBackHost {
       instance.context = context;
       FeedBackHost.calcScaleRatio(designWidth);
     }
+
+    if (instance.context != context) {
+      print('leo_feedback: content is change');
+      instance.context = context;
+    }
+
     if (instance.brightness != brightness) {
       instance.brightness = brightness;
       instance.feedBackTheme = FeedbackThemeData(brightness: brightness);
@@ -105,7 +111,6 @@ class FeedBackHost {
     if (isSlider)
       FeedBackHost.instance._sliderOverlayEntrySet.add(_overlayEntry);
     Overlay.of(instance.context!)!.insert(_overlayEntry);
-    print(FeedBackHost.instance._sliderOverlayEntrySet.length);
     return _overlayEntry;
   }
 

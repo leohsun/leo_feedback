@@ -90,7 +90,7 @@ void showLoading(
   if (duration != null) {
     Future.delayed(duration).then((value) => hideLoading());
   }
-  print('show end');
+  print('leo_feedback: show start');
 }
 
 void hideLoading() async {
@@ -132,15 +132,14 @@ void showAlert(
   FeedbackThemeData theme = FeedBackHost.instance.feedBackTheme;
   FeedBackHost.instance._uniqueGlobalStateKey =
       GlobalKey(debugLabel: 'alert key');
-  print(FeedBackHost.instance);
   final double _width = 270;
   final double _bottomHeight = 44;
+  final double _height = 140;
   final String _title = (title != null && title.isNotEmpty) ? title : '提示';
 
   AlertType _type = type ?? AlertType.normal;
 
   void _dismissAlert() async {
-    print(FeedBackHost.instance._uniqueGlobalStateKey);
     if (FeedBackHost.instance._uniqueGlobalStateKey.currentState != null) {
       await (FeedBackHost.instance._uniqueGlobalStateKey.currentState
               as _FadeZoomBoxState)
@@ -224,7 +223,7 @@ void showAlert(
     key: FeedBackHost.instance._uniqueGlobalStateKey,
     child: Container(
       width: _width,
-      height: 140,
+      height: _height,
       child: Stack(
         children: <Widget>[
           buildBlurWidget(
@@ -238,29 +237,32 @@ void showAlert(
             mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: <Widget>[
-              Padding(
-                padding:
-                    EdgeInsets.only(left: 16, right: 16, top: 19, bottom: 21),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: <Widget>[
-                    Text(
-                      _title,
-                      style: TextStyle(
-                          color: theme.labelPrimaryColor,
-                          fontSize: 16,
-                          fontWeight: FontWeight.w500),
-                    ),
-                    SizedBox(
-                      height: 2,
-                    ),
-                    Text(
-                      content,
-                      style: TextStyle(
-                          color: theme.labelPrimaryColor, fontSize: 14),
-                      textAlign: TextAlign.center,
-                    ),
-                  ],
+              Container(
+                height: _height - _bottomHeight - 1,
+                child: Padding(
+                  padding:
+                      EdgeInsets.only(left: 16, right: 16, top: 19, bottom: 21),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: <Widget>[
+                      Text(
+                        _title,
+                        style: TextStyle(
+                            color: theme.labelPrimaryColor,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w500),
+                      ),
+                      SizedBox(
+                        height: 2,
+                      ),
+                      Text(
+                        content,
+                        style: TextStyle(
+                            color: theme.labelPrimaryColor, fontSize: 14),
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
+                  ),
                 ),
               ),
               Container(

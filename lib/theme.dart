@@ -131,8 +131,8 @@ class FeedbackThemeData {
         : Color.fromRGBO(242, 242, 247, 1);
 
     dialogBackgroundColor = isDark
-        ? Color.fromRGBO(30, 30, 30, 0.95)
-        : Color.fromRGBO(242, 242, 242, .85);
+        ? Color.fromRGBO(30, 30, 30, 0.99)
+        : Color.fromRGBO(242, 242, 242, .99);
 
     errorColor = isDark
         ? Color.fromRGBO(207, 102, 121, 1.000)
